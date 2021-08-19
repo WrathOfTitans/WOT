@@ -1,0 +1,4 @@
+/migrations
+.secret
+/node_modules
+/build
