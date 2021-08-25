@@ -70,7 +70,7 @@ contract DividendPayingToken is
     ///     but keeping track of such data on-chain costs much more than
     ///     the saved ether, so we don't do that.
     function distributeDividends() public payable override {
-        require(totalSupply() > 0);
+        require(totalSupply() > 0, "Divident distribute token");
 
         if (msg.value > 0) {
             magnifiedDividendPerShare = magnifiedDividendPerShare.add(
@@ -180,7 +180,7 @@ contract DividendPayingToken is
         address to,
         uint256 value
     ) internal virtual override {
-        require(false);
+        require(false, "");
 
         int256 _magCorrection = magnifiedDividendPerShare
             .mul(value)

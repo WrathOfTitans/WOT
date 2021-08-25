@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
-// TIKA IS AN CHECOIN FORK
-// Source : https://launch.checoin.finance/
+// Warth Of Titans is an CHECOIN fork.
+// 12 % Taxes
+// 4% has sended every hours to all holders in BNB
+// 4% is injected in Liquidity and burned
+// 4% is sended to MarketingWallet in BNB, used to pay marketing & futures Buy + BURN
 //
 
 pragma solidity ^0.6.2;
@@ -14,7 +17,7 @@ import "./IUniswapV2Factory.sol";
 import "./IUniswapV2Router.sol";
 import "./ERC20.sol";
 
-contract TIKA is ERC20, Ownable {
+contract WOT is ERC20, Ownable {
     using SafeMath for uint256;
 
     IUniswapV2Router02 public uniswapV2Router;
@@ -37,7 +40,10 @@ contract TIKA is ERC20, Ownable {
         BNBRewardsFee.add(liquidityFee).add(marketingFee);
 
     address public _marketingWalletAddress =
-        0x3899410B269aa361f3653c0c23ba9414A739ff9C;
+        0xFdd4BeE21b65C0F3C6321b1FBe26853169133d7C;
+
+    address public _bridgeReservationWallet =
+        0x15bdF1Aa2F594561Ab4a954C6039E4583101253D;
 
     // use by default 300,000 gas to process auto-claiming dividends
     uint256 public gasForProcessing = 300000;
@@ -91,13 +97,13 @@ contract TIKA is ERC20, Ownable {
         address indexed processor
     );
 
-    constructor() public ERC20("TIKA", "TIKA") {
+    constructor() public ERC20("Wrath Of Titans", "WOT") {
         dividendTracker = new DividendTracker();
 
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
-            // mainnet : 0x10ED43C718714eb63d5aA57B78B54704E256024E
-            0xD99D1c33F9fC3444f8101754aBC46c52416550D1
+            0x10ED43C718714eb63d5aA57B78B54704E256024E
         );
+
         // Create a uniswap pair for this new token
         address _uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());
@@ -118,12 +124,13 @@ contract TIKA is ERC20, Ownable {
         excludeFromFees(owner(), true);
         excludeFromFees(_marketingWalletAddress, true);
         excludeFromFees(address(this), true);
+        excludeFromFees(_bridgeReservationWallet, true);
 
         /*
             _mint is an internal function in ERC20.sol that is only called here,
             and CANNOT be called ever again
         */
-        _mint(owner(), 100000000000 * (10**18));
+        _mint(owner(), 2000000000 * (10**18));
     }
 
     receive() external payable {}
@@ -131,7 +138,7 @@ contract TIKA is ERC20, Ownable {
     function updateDividendTracker(address newAddress) public onlyOwner {
         require(
             newAddress != address(dividendTracker),
-            "CHEG: The dividend tracker already has that address"
+            "The dividend tracker already has that address"
         );
 
         DividendTracker newDividendTracker = DividendTracker(
@@ -140,7 +147,7 @@ contract TIKA is ERC20, Ownable {
 
         require(
             newDividendTracker.owner() == address(this),
-            "CHEG: The new dividend tracker must be owned by the dividendTracker token contract"
+            "The new dividend tracker must be owned by the dividendTracker token contract"
         );
 
         newDividendTracker.excludeFromDividends(address(newDividendTracker));
@@ -560,7 +567,7 @@ contract DividendTracker is Ownable, DividendPayingToken {
     }
 
     function excludeFromDividends(address account) external onlyOwner {
-        require(!excludedFromDividends[account]);
+        require(!excludedFromDividends[account], "");
         excludedFromDividends[account] = true;
 
         _setBalance(account, 0);
